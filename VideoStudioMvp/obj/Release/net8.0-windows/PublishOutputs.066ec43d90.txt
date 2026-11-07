@@ -1,0 +1,5 @@
+E:\code_tushp\dist\VideoStudioMvp.exe
+E:\code_tushp\dist\VideoStudioMvp.dll
+E:\code_tushp\dist\VideoStudioMvp.deps.json
+E:\code_tushp\dist\VideoStudioMvp.runtimeconfig.json
+E:\code_tushp\dist\VideoStudioMvp.pdb

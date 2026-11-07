@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>VideoStudioMvp</RootNamespace>
+    <ApplicationIcon>Assets\app-logo.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets\app-logo.png" />
+    <Content Include="Assets\app-logo.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
