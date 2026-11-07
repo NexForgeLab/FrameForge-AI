@@ -22,3 +22,4 @@ E:\code_tushp\VideoStudioMvp\obj\Debug\net8.0-windows\VideoStudioMvp.genruntimec
 E:\code_tushp\VideoStudioMvp\obj\Debug\net8.0-windows\ref\VideoStudioMvp.dll
 E:\code_tushp\VideoStudioMvp\obj\Debug\net8.0-windows\VideoStudioMvp_Content.g.cs
 E:\code_tushp\VideoStudioMvp\bin\Debug\net8.0-windows\Assets\app-logo.ico
+E:\code_tushp\VideoStudioMvp\obj\Debug\net8.0-windows\VideoStudioMvp.sourcelink.json

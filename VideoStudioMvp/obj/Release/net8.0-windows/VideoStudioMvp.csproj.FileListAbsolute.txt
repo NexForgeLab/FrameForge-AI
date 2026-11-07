@@ -20,3 +20,6 @@ E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\refint\VideoStudioMvp.dl
 E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\VideoStudioMvp.pdb
 E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\VideoStudioMvp.genruntimeconfig.cache
 E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\ref\VideoStudioMvp.dll
+E:\code_tushp\VideoStudioMvp\bin\Release\net8.0-windows\Assets\app-logo.ico
+E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\VideoStudioMvp_Content.g.cs
+E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\VideoStudioMvp.sourcelink.json

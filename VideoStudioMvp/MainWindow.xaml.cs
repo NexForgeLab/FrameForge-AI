@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Windows;
@@ -33,6 +34,7 @@ public partial class MainWindow : System.Windows.Window
     private double _modeMarqueeMaxOffset;
     private int _modeMarqueeDirection;
     private DateTime _modeMarqueeHoldUntil;
+    private readonly LocalAgentBridge _agentBridge;
 
     public MainWindow()
     {
@@ -52,6 +54,9 @@ public partial class MainWindow : System.Windows.Window
         EmptyTaskHint.Visibility = System.Windows.Visibility.Visible;
         _settings = LoadSettings();
         UpdateModeDisplay();
+        _agentBridge = new LocalAgentBridge(47821, HandleAgentRequestAsync);
+        _agentBridge.Start();
+        Closed += (_, _) => _agentBridge.Dispose();
     }
 
     private void ChooseImage_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -321,6 +326,7 @@ public partial class MainWindow : System.Windows.Window
     private async void Generate_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(PromptBox.Text)) { StatusText.Text = "请输入提示词。"; return; }
+        VideoPreview.Visibility = Visibility.Collapsed;
         VideoPreview.Stop();
         VideoPreview.Source = null;
         _lastVideoPath = null;
@@ -346,7 +352,13 @@ public partial class MainWindow : System.Windows.Window
             if (!string.IsNullOrWhiteSpace(result.LocalPath)) { _lastVideoPath = result.LocalPath; OpenFolderButton.IsEnabled = true; StatusText.Text = "生成完成：" + result.LocalPath; }
             else if (!string.IsNullOrWhiteSpace(result.VideoUrl)) { _lastVideoPath = await DownloadVideoAsync(result.VideoUrl); OpenFolderButton.IsEnabled = true; StatusText.Text = "生成完成，视频已保存。"; }
             task.VideoPath = _lastVideoPath;
-            if (_lastVideoPath is not null && Path.GetExtension(_lastVideoPath).Equals(".mp4", StringComparison.OrdinalIgnoreCase)) { VideoPreview.Source = new Uri(_lastVideoPath); VideoPreview.Play(); EmptyPreview.Visibility = System.Windows.Visibility.Collapsed; }
+            if (_lastVideoPath is not null && Path.GetExtension(_lastVideoPath).Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+            {
+                VideoPreview.Source = new Uri(_lastVideoPath);
+                VideoPreview.Visibility = Visibility.Visible;
+                VideoPreview.Play();
+                EmptyPreview.Visibility = System.Windows.Visibility.Collapsed;
+            }
         }
         catch (Exception ex)
         {
@@ -357,6 +369,80 @@ public partial class MainWindow : System.Windows.Window
             RefreshTasks();
         }
         finally { RefreshTasks(); GenerateButton.Content = "生成视频"; GenerateButton.IsEnabled = true; }
+    }
+
+    private async Task<AgentBridgeResponse> HandleAgentRequestAsync(AgentHttpRequest request)
+    {
+        if (!string.Equals(request.Method, "GET", StringComparison.OrdinalIgnoreCase) && !string.Equals(request.Method, "POST", StringComparison.OrdinalIgnoreCase))
+            return new(405, new { error = "仅支持 GET 和 POST。" });
+
+        var path = request.Path.Split('?', 2)[0].TrimEnd('/');
+        if (path.Equals("/api/v1/status", StringComparison.OrdinalIgnoreCase))
+        {
+            var preset = AppSettings.GetPreset(_settings.Provider);
+            return new(200, new
+            {
+                ready = !string.IsNullOrWhiteSpace(_settings.GetApiKey(_settings.Provider)),
+                provider = _settings.Provider,
+                providerName = preset.Name,
+                model = _settings.Model,
+                capabilities = new[] { "list_models", "list_assets", "generate_video", "task_status" }
+            });
+        }
+
+        if (path.Equals("/api/v1/models", StringComparison.OrdinalIgnoreCase))
+            return new(200, AppSettings.GetModels(_settings.Provider));
+
+        if (path.Equals("/api/v1/assets", StringComparison.OrdinalIgnoreCase))
+        {
+            var directory = Path.Combine(AppContext.BaseDirectory, "imgSoure");
+            Directory.CreateDirectory(directory);
+            var assets = Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories)
+                .Where(IsImageFile)
+                .Where(file => !file.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => part.Equals(".cache", StringComparison.OrdinalIgnoreCase)))
+                .Select(file => new { name = Path.GetFileName(file), path = file })
+                .ToList();
+            return new(200, assets);
+        }
+
+        if (path.Equals("/api/v1/tasks", StringComparison.OrdinalIgnoreCase))
+        {
+            return new(200, _tasks.Select(task => new
+            {
+                id = task.Id, task.Status, task.Progress, task.ErrorMessage, task.VideoPath, task.CreatedAt
+            }).ToList());
+        }
+
+        if (path.Equals("/api/v1/generations", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(request.Method, "POST", StringComparison.OrdinalIgnoreCase))
+        {
+            var command = JsonSerializer.Deserialize<AgentGenerationCommand>(request.Body, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            if (command is null || string.IsNullOrWhiteSpace(command.Prompt))
+                return new(400, new { error = "prompt 不能为空。" });
+            if (!command.Confirm)
+                return new(409, new { requiresConfirmation = true, message = "生成视频可能产生费用，请确认 provider、model、时长和分辨率后再提交。" });
+            if (!GenerateButton.IsEnabled)
+                return new(409, new { error = "当前已有视频生成任务正在运行，请稍后再试。" });
+
+            var taskId = await Dispatcher.InvokeAsync(() =>
+            {
+                PromptBox.Text = command.Prompt.Trim();
+                ImagePathBox.Text = command.ImagePath ?? "";
+                DurationBox.Text = Math.Clamp(command.Duration, 1, 15).ToString();
+                Ratio169Button.IsChecked = command.Ratio == "16:9";
+                Ratio916Button.IsChecked = command.Ratio == "9:16";
+                Ratio11Button.IsChecked = command.Ratio == "1:1";
+                Resolution480Button.IsChecked = command.Resolution == "480p";
+                Resolution720Button.IsChecked = command.Resolution == "720p";
+                Resolution1080Button.IsChecked = command.Resolution == "1080p";
+                AudioBox.IsChecked = command.GenerateAudio;
+                Generate_Click(GenerateButton, new RoutedEventArgs());
+                return _tasks.Count > 0 ? _tasks[0].Id : "";
+            });
+            return new(202, new { accepted = true, taskId, message = "任务已提交，使用 GET /api/v1/tasks 查询状态。" });
+        }
+
+        return new(404, new { error = "未找到接口。" });
     }
 
     private static string FormatGenerationError(Exception ex)
@@ -535,6 +621,8 @@ public partial class MainWindow : System.Windows.Window
                 settings.ApiKeys[settings.Provider] = settings.ApiKey;
             if (settings.ApiKeys.TryGetValue(settings.Provider, out var providerKey))
                 settings.ApiKey = providerKey;
+            if (settings.Provider == VideoProviders.Minimax && settings.Endpoint.Contains("api.minimax.io", StringComparison.OrdinalIgnoreCase))
+                settings.Endpoint = settings.Endpoint.Replace("api.minimax.io", "api.minimaxi.com", StringComparison.OrdinalIgnoreCase);
             if (string.IsNullOrWhiteSpace(settings.Endpoint)) settings.Endpoint = AppSettings.DefaultEndpoint;
             if (string.IsNullOrWhiteSpace(settings.Model) || settings.Model == "doubao-seedance-2-0") settings.Model = AppSettings.DefaultModel;
             if (string.IsNullOrWhiteSpace(settings.Provider)) settings.Provider = "volcengine";
@@ -578,7 +666,7 @@ public sealed class AppSettings
         VideoProviders.Luma => new("Luma Dream Machine", "https://api.lumalabs.ai/dream-machine/v1/generations", "ray-2"),
         VideoProviders.GoogleVeo => new("Google Veo", "https://generativelanguage.googleapis.com/v1beta/models/{model}:predictLongRunning", "veo-3.1-generate-preview"),
         VideoProviders.AlibabaWan => new("阿里云 Wan", "https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis", "wan2.7-i2v"),
-        VideoProviders.Minimax => new("MiniMax · Hailuo", "https://api.minimax.io/v1/video_generation", "MiniMax-Hailuo-02"),
+        VideoProviders.Minimax => new("MiniMax · Hailuo", "https://api.minimaxi.com/v1/video_generation", "MiniMax-Hailuo-02"),
         _ => new("火山方舟 · Seedance", DefaultEndpoint, DefaultModel)
     };
 

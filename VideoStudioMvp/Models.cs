@@ -32,3 +32,12 @@ public sealed class VideoTask
 }
 
 public sealed record ProviderResult(string TaskId, string? VideoUrl = null, string? LocalPath = null);
+
+public sealed record AgentGenerationCommand(
+    string Prompt,
+    string? ImagePath = null,
+    string Ratio = "9:16",
+    int Duration = 5,
+    string Resolution = "720p",
+    bool GenerateAudio = false,
+    bool Confirm = false);

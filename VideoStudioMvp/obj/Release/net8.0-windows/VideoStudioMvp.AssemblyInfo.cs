@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VideoStudioMvp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+98114ee9865c966c56a331cd9d280be61e675971")]
 [assembly: System.Reflection.AssemblyProductAttribute("VideoStudioMvp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VideoStudioMvp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -482,3 +482,4 @@ E:\code_tushp\VideoStudioMvp\bin\Release\net8.0-windows\win-x64\zh-Hant\UIAutoma
 E:\code_tushp\VideoStudioMvp\bin\Release\net8.0-windows\win-x64\zh-Hant\WindowsBase.resources.dll
 E:\code_tushp\VideoStudioMvp\bin\Release\net8.0-windows\win-x64\zh-Hant\WindowsFormsIntegration.resources.dll
 E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\win-x64\VideoStu.E6868D58.Up2Date
+E:\code_tushp\VideoStudioMvp\obj\Release\net8.0-windows\win-x64\VideoStudioMvp.sourcelink.json

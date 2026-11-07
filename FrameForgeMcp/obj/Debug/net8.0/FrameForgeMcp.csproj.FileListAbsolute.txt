@@ -1,0 +1,15 @@
+E:\code_tushp\FrameForgeMcp\bin\Debug\net8.0\FrameForgeMcp.exe
+E:\code_tushp\FrameForgeMcp\bin\Debug\net8.0\FrameForgeMcp.deps.json
+E:\code_tushp\FrameForgeMcp\bin\Debug\net8.0\FrameForgeMcp.runtimeconfig.json
+E:\code_tushp\FrameForgeMcp\bin\Debug\net8.0\FrameForgeMcp.dll
+E:\code_tushp\FrameForgeMcp\bin\Debug\net8.0\FrameForgeMcp.pdb
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.GeneratedMSBuildEditorConfig.editorconfig
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.AssemblyInfoInputs.cache
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.AssemblyInfo.cs
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.csproj.CoreCompileInputs.cache
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.sourcelink.json
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.dll
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\refint\FrameForgeMcp.dll
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.pdb
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\FrameForgeMcp.genruntimeconfig.cache
+E:\code_tushp\FrameForgeMcp\obj\Debug\net8.0\ref\FrameForgeMcp.dll
